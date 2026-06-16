@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GoldSwap – Peer Gold Exchange</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ─── TOKENS ─────────────────────────────── */
+:root{
+  --y0:#FFF8C6; --y1:#FFE066; --y2:#D4A017; --y3:#A67C00; --y4:#6B4F00;
+  --ink:#1C1200; --ink2:#3D2E00; --muted:#7A6230;
+  --white:#FFFFFF; --offwhite:#FFFDF0;
+  --green:#1E6E3F; --greenlt:#D4F0E2;
+  --red:#B03030;   --redlt:#FFE8E8;
+  --shadow:0 4px 24px rgba(160,120,0,.13);
+  --radius:10px;
+  --nav-h:62px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--y0);color:var(--ink);line-height:1.6;overflow-x:hidden}
+
+/* ─── FLOATING GOLD PARTICLES ────────────── */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.p{position:absolute;border-radius:50%;opacity:.18;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(110vh) rotate(0deg)}100%{transform:translateY(-10vh) rotate(360deg)}}
+
+/* ─── NAV ────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:var(--nav-h);
+  background:var(--ink);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
+  border-bottom:2px solid var(--y2);
+}
+.logo{
+  font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;
+  color:var(--y1);letter-spacing:.02em;cursor:pointer;
+}
+.logo span{color:var(--y2);font-style:italic}
+.nav-links{display:flex;gap:.2rem;list-style:none}
+.nav-links a{
+  color:rgba(255,248,198,.7);font-size:.75rem;font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+  padding:.4rem .65rem;border-radius:5px;transition:.2s;
+}
+.nav-links a:hover{color:var(--y1);background:rgba(255,224,102,.08)}
+.nav-cta{
+  background:var(--y2);color:var(--ink);border:none;cursor:pointer;
+  padding:.42rem 1.1rem;border-radius:5px;font-weight:700;font-size:.78rem;
+  letter-spacing:.04em;transition:.15s;
+}
+.nav-cta:hover{background:var(--y1)}
+.hamburger{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:.3rem}
+.hamburger span{display:block;width:22px;height:2px;background:var(--y1);border-radius:2px;transition:.3s}
+.mob-menu{
+  display:none;position:fixed;top:var(--nav-h);left:0;right:0;
+  background:var(--ink);border-bottom:2px solid var(--y2);
+  flex-direction:column;z-index:199;
+}
+.mob-menu a{
+  color:rgba(255,248,198,.8);padding:.9rem 2rem;font-size:.9rem;
+  text-decoration:none;border-bottom:1px solid rgba(255,224,102,.1);
+  font-weight:500;display:block;
+}
+.mob-menu a:hover{background:rgba(255,224,102,.06);color:var(--y1)}
+.mob-menu.open{display:flex}
+
+/* ─── PAGE SHELL ─────────────────────────── */
+main{padding-top:var(--nav-h)}
+.page{display:none;min-height:calc(100vh - var(--nav-h));position:relative;z-index:1}
+.page.active{display:block}
+
+/* ─── SECTION COMMON ─────────────────────── */
+.sec{padding:4.5rem 2rem}
+.wrap{max-width:1060px;margin:0 auto}
+.sec-eye{font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--y3);margin-bottom:.4rem}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;line-height:1.12;margin-bottom:.5rem;color:var(--ink)}
+.sec-sub{color:var(--ink2);font-size:.95rem;max-width:520px;margin-bottom:2.5rem}
+.divider{border:none;border-top:1.5px solid #E8CC66;margin-bottom:2.5rem}
+
+/* ─── SLIDE-IN ANIMATION ─────────────────── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .55s ease,transform .55s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+/* ─── TICKER ─────────────────────────────── */
+.ticker-bar{
+  background:var(--ink2);padding:.7rem 2rem;
+  display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap;
+  position:relative;z-index:1;
+}
+.t-label{font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.t-item{display:flex;flex-direction:column}
+.t-val{font-family:'JetBrains Mono',monospace;color:var(--y1);font-size:1rem;font-weight:500}
+.t-sub{font-size:.65rem;color:var(--muted)}
+.t-up{color:#5CB85C}.t-dn{color:#D9534F}
+.t-time{margin-left:auto;font-size:.65rem;color:var(--muted);font-style:italic;white-space:nowrap}
+
+/* ─── HOME / HERO ────────────────────────── */
+#home{
+  background:linear-gradient(150deg,var(--ink) 0%,#251800 55%,#3D2800 100%);
+  min-height:calc(100vh - var(--nav-h));
+  display:flex;flex-direction:column;
+}
+.hero-inner{
+  flex:1;display:flex;align-items:center;
+  padding:3rem 2rem 2rem;max-width:1060px;margin:0 auto;width:100%;
+  gap:3rem;
+}
+.hero-text{flex:1;min-width:0}
+.hero-badge{
+  display:inline-block;background:var(--y2);color:var(--ink);
+  font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.28rem .75rem;border-radius:3px;margin-bottom:1.1rem;
+}
+.hero-h1{
+  font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5.5vw,4rem);
+  font-weight:900;color:var(--white);line-height:1.08;margin-bottom:1rem;
+}
+.hero-h1 em{color:var(--y1);font-style:normal}
+.hero-p{color:rgba(255,248,198,.75);font-size:1rem;max-width:480px;margin-bottom:.6rem}
+.hero-warn{
+  display:flex;gap:.5rem;align-items:flex-start;
+  background:rgba(255,224,102,.07);border:1px solid rgba(255,224,102,.2);
+  border-radius:6px;padding:.7rem 1rem;margin-bottom:1.8rem;
+  font-size:.8rem;color:rgba(255,248,198,.6);max-width:480px;
+}
+.hero-actions{display:flex;gap:.8rem;flex-wrap:wrap}
+.btn{
+  display:inline-block;cursor:pointer;text-decoration:none;border:none;
+  font-weight:700;font-size:.88rem;padding:.68rem 1.5rem;border-radius:6px;
+  transition:transform .12s,background .15s,border-color .15s;
+  letter-spacing:.02em;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{background:var(--y2);color:var(--ink)}
+.btn-gold:hover{background:var(--y1)}
+.btn-outline{background:transparent;color:var(--y0);border:1.5px solid rgba(255,224,102,.4)}
+.btn-outline:hover{border-color:var(--y1);color:var(--y1)}
+
+/* hero visual — animated price comparison */
+.hero-vis{
+  flex:0 0 300px;display:flex;flex-direction:column;gap:.8rem;align-items:center;
+}
+.price-card{
+  width:100%;background:rgba(255,248,198,.05);
+  border:1px solid rgba(255,224,102,.15);border-radius:10px;
+  padding:1.1rem 1.4rem;position:relative;overflow:hidden;
+}
+.price-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,224,102,.04),transparent)}
+.pc-label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem}
+.pc-bad .pc-label{color:var(--red)}
+.pc-good .pc-label{color:var(--green)}
+.pc-amount{font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:500;line-height:1}
+.pc-bad .pc-amount{color:#FF8A8A}
+.pc-good .pc-amount{color:#7FE0A8}
+.pc-note{font-size:.72rem;color:rgba(255,248,198,.45);margin-top:.3rem}
+.pc-vs{
+  font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--y2);display:flex;align-items:center;gap:.5rem;
+}
+.pc-vs::before,.pc-vs::after{content:'';flex:1;height:1px;background:rgba(255,224,102,.2)}
+.hero-stat-row{
+  display:flex;gap:2rem;flex-wrap:wrap;
+  padding:1.5rem 2rem;background:rgba(0,0,0,.25);border-top:1px solid rgba(255,224,102,.1);
+  max-width:1060px;margin:0 auto;width:100%;
+}
+.h-stat strong{display:block;font-family:'JetBrains Mono',monospace;font-size:1.4rem;color:var(--y1)}
+.h-stat span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* ─── HOW IT WORKS ───────────────────────── */
+#how{background:var(--y0)}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem}
+.step-card{
+  background:var(--white);border:1.5px solid #E8CC66;border-radius:var(--radius);
+  padding:1.6rem 1.4rem;transition:box-shadow .2s,transform .2s;
+}
+.step-card:hover{box-shadow:var(--shadow);transform:translateY(-3px)}
+.step-n{font-family:'JetBrains Mono',monospace;font-size:2rem;color:#E8CC66;line-height:1;margin-bottom:.7rem}
+.step-card h3{font-size:.95rem;font-weight:700;margin-bottom:.35rem}
+.step-card p{font-size:.83rem;color:var(--ink2)}
+
+/* compare strip */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:3rem}
+.cmp{border-radius:var(--radius);padding:1.8rem}
+.cmp.bad{background:#FFF0F0;border:1.5px solid #F5BBBB}
+.cmp.good{background:#F0FBF4;border:1.5px solid #A0DAB5}
+.cmp-tag{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem;display:block}
+.cmp.bad .cmp-tag{color:var(--red)}
+.cmp.good .cmp-tag{color:var(--green)}
+.cmp-amt{font-family:'JetBrains Mono',monospace;font-size:2rem;margin-bottom:.3rem}
+.cmp.bad .cmp-amt{color:var(--red)}
+.cmp.good .cmp-amt{color:var(--green)}
+.cmp ul{margin:.7rem 0 0 1rem;font-size:.83rem;color:var(--ink2)}
+.cmp ul li{margin-bottom:.25rem}
+
+/* ─── BROWSE (Consumer) ──────────────────── */
+#browse{background:var(--offwhite)}
+.filter-bar{
+  display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:2rem;
+  background:var(--white);border:1px solid #E8CC66;border-radius:var(--radius);
+  padding:1rem 1.2rem;
+}
+.filter-bar select,.filter-bar input{
+  border:1.5px solid #E8CC66;border-radius:5px;padding:.4rem .7rem;
+  font-size:.82rem;font-family:'Inter',sans-serif;color:var(--ink);
+  background:var(--offwhite);outline:none;
+}
+.filter-bar select:focus,.filter-bar input:focus{border-color:var(--y2)}
+.filter-bar .btn-gold{font-size:.8rem;padding:.4rem 1rem}
+.listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.3rem}
+.lcard{
+  background:var(--white);border:1px solid #E8CC66;border-radius:var(--radius);
+  overflow:hidden;transition:box-shadow .2s,transform .15s;
+}
+.lcard:hover{box-shadow:var(--shadow);transform:translateY(-3px)}
+.lcard-img{
+  height:150px;background:linear-gradient(135deg,var(--y2),var(--y3));
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+}
+.lcard-body{padding:1.1rem}
+.lcard-title{font-weight:700;font-size:.97rem;margin-bottom:.2rem}
+.lcard-meta{font-size:.73rem;color:var(--muted);margin-bottom:.7rem}
+.lcard-price{font-family:'JetBrains Mono',monospace;font-size:1.25rem;color:var(--y3);font-weight:500;margin-bottom:.7rem}
+.tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem}
+.tag{background:var(--y0);color:var(--ink2);font-size:.7rem;padding:.15rem .5rem;border-radius:3px;font-weight:500}
+.btn-sm{
+  display:inline-block;background:var(--y2);color:var(--ink);border:none;cursor:pointer;
+  padding:.36rem .9rem;border-radius:5px;font-size:.78rem;font-weight:700;
+  text-decoration:none;transition:background .15s;
+}
+.btn-sm:hover{background:var(--y1)}
+
+/* ─── POST FORM ──────────────────────────── */
+#post{background:var(--y0)}
+.post-wrap{
+  background:var(--white);border:1px solid #E8CC66;border-radius:var(--radius);
+  padding:2.5rem;max-width:720px;box-shadow:var(--shadow);
+}
+.comm-banner{
+  background:var(--y0);border-left:3px solid var(--y2);
+  padding:.8rem 1rem;border-radius:0 6px 6px 0;
+  font-size:.82rem;color:var(--ink2);margin-bottom:1.5rem;
+}
+.comm-banner strong{color:var(--y3)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+.fg{display:flex;flex-direction:column;gap:.35rem}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:.78rem;font-weight:600;color:var(--ink2)}
+.fg input,.fg select,.fg textarea{
+  border:1.5px solid #E8CC66;border-radius:5px;padding:.58rem .8rem;
+  font-size:.88rem;font-family:'Inter',sans-serif;color:var(--ink);
+  background:var(--offwhite);outline:none;transition:border-color .2s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--y2)}
+.fg textarea{min-height:88px;resize:vertical}
+.fg .hint{font-size:.7rem;color:var(--muted)}
+.calc-preview{
+  background:var(--y0);border:1px solid #E8CC66;border-radius:6px;
+  padding:.9rem 1.1rem;font-size:.83rem;color:var(--ink2);
+  grid-column:1/-1;
+}
+.calc-preview strong{color:var(--y3);font-family:'JetBrains Mono',monospace}
+
+/* ─── TRANSACTIONS ───────────────────────── */
+#txn{background:var(--offwhite)}
+.txn-wrap{overflow-x:auto}
+table.txntable{width:100%;border-collapse:collapse;font-size:.83rem}
+.txntable thead{background:var(--ink);color:var(--y0)}
+.txntable th{padding:.75rem 1rem;text-align:left;font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;font-weight:600}
+.txntable td{padding:.75rem 1rem;border-bottom:1px solid #E8CC66;vertical-align:middle}
+.txntable tr:hover td{background:var(--y0)}
+.badge{display:inline-block;padding:.18rem .55rem;border-radius:3px;font-size:.68rem;font-weight:700;letter-spacing:.04em}
+.b-done{background:var(--greenlt);color:var(--green)}
+.b-pend{background:#FFF3CC;color:#7A5800}
+.b-canc{background:var(--redlt);color:var(--red)}
+.b-disp{background:#EEE8FF;color:#5530AA}
+mono{font-family:'JetBrains Mono',monospace;font-size:.8rem}
+
+/* ─── PREVIOUS CONSUMERS ─────────────────── */
+#prev{background:var(--y0)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem}
+.tcard{
+  background:var(--white);border:1px solid #E8CC66;border-radius:var(--radius);
+  padding:1.5rem;
+}
+.tcard-q{font-size:.88rem;color:var(--ink2);font-style:italic;margin-bottom:1rem;line-height:1.55}
+.tcard-who{font-weight:700;font-size:.83rem}
+.tcard-det{font-size:.72rem;color:var(--muted)}
+.tcard-save{
+  display:inline-block;margin-top:.5rem;
+  background:var(--y0);color:var(--y3);
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  padding:.18rem .55rem;border-radius:3px;font-weight:500;
+}
+
+/* ─── USER GUIDE ─────────────────────────── */
+#guide{background:var(--ink)}
+#guide .sec-title{color:var(--white)}
+#guide .sec-eye{color:var(--y2)}
+#guide .sec-sub{color:rgba(255,248,198,.5)}
+#guide .divider{border-color:rgba(255,224,102,.15)}
+.guide-list{display:flex;flex-direction:column;gap:1.2rem;max-width:680px}
+.gstep{display:grid;grid-template-columns:2.5rem 1fr;gap:1rem;align-items:start}
+.gstep-n{
+  font-family:'JetBrains Mono',monospace;font-size:.9rem;
+  color:var(--y2);background:rgba(255,224,102,.08);
+  border:1px solid rgba(255,224,102,.2);border-radius:5px;
+  padding:.3rem .4rem;text-align:center;font-weight:500;
+}
+.gstep h4{font-size:.93rem;font-weight:700;color:var(--white);margin-bottom:.3rem}
+.gstep p{font-size:.83rem;color:rgba(255,248,198,.5)}
+.warn-box{
+  background:rgba(176,48,48,.15);border:1px solid rgba(176,48,48,.35);
+  border-radius:6px;padding:1rem 1.2rem;margin-top:2rem;max-width:680px;
+}
+.warn-box h4{font-size:.85rem;font-weight:700;color:#FF9999;margin-bottom:.4rem}
+.warn-box p{font-size:.8rem;color:rgba(255,248,198,.5);margin-bottom:.3rem}
+
+/* ─── LOGIN ──────────────────────────────── */
+#login-page{
+  background:linear-gradient(150deg,var(--ink) 0%,#251800 100%);
+  display:flex;align-items:center;justify-content:center;
+  min-height:calc(100vh - var(--nav-h));
+}
+.login-box{
+  background:rgba(255,248,198,.04);border:1px solid rgba(255,224,102,.18);
+  border-radius:12px;padding:2.8rem 2.2rem;width:100%;max-width:400px;
+  backdrop-filter:blur(4px);
+}
+.login-logo{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--y1);text-align:center;margin-bottom:.3rem}
+.login-sub{text-align:center;font-size:.8rem;color:var(--muted);margin-bottom:2rem}
+.login-box .fg label{color:rgba(255,248,198,.6)}
+.login-box .fg input{background:rgba(255,248,198,.04);border-color:rgba(255,224,102,.25);color:var(--y0)}
+.login-box .fg input:focus{border-color:var(--y2)}
+.otp-note{text-align:center;font-size:.73rem;color:var(--muted);margin-top:.7rem}
+.login-terms{font-size:.7rem;color:rgba(255,248,198,.3);text-align:center;margin-top:1.2rem;line-height:1.5}
+
+/* ─── BACKEND SPEC ───────────────────────── */
+#backend{background:#FAF6E6}
+.spec-card{
+  background:var(--white);border:1px solid #E8CC66;border-radius:var(--radius);
+  padding:1.8rem;margin-bottom:1.4rem;
+}
+.spec-card h3{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:.3rem;color:var(--ink)}
+.spec-card .sub{font-size:.75rem;color:var(--muted);margin-bottom:1.1rem}
+.spec-card table{width:100%;border-collapse:collapse;font-size:.8rem}
+.spec-card th{text-align:left;color:var(--muted);font-weight:600;padding:.4rem .6rem;border-bottom:1px solid #E8CC66;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
+.spec-card td{padding:.42rem .6rem;border-bottom:1px solid #F5E8A0;vertical-align:top}
+.spec-card ul{margin:0 0 0 1.1rem}
+.spec-card ul li{font-size:.82rem;color:var(--ink2);margin-bottom:.28rem}
+code{font-family:'JetBrains Mono',monospace;font-size:.75rem;background:var(--y0);color:var(--y3);padding:.08rem .35rem;border-radius:3px}
+.m{display:inline-block;padding:.1rem .4rem;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;margin-right:.25rem}
+.mg{background:#D4EDDA;color:#155724}
+.mb{background:#CCE5FF;color:#004085}
+.mp{background:#FFF3CD;color:#856404}
+.md{background:#F8D7DA;color:#721C24}
+.honest-box{
+  background:#FFF8E0;border:1.5px solid var(--y2);border-radius:8px;
+  padding:1.2rem 1.4rem;margin-bottom:2rem;
+}
+.honest-box h4{font-size:.88rem;font-weight:700;color:var(--y3);margin-bottom:.5rem}
+.honest-box ul{margin:0 0 0 1rem}
+.honest-box ul li{font-size:.82rem;color:var(--ink2);margin-bottom:.3rem}
+
+/* ─── FOOTER ─────────────────────────────── */
+footer{
+  background:var(--ink);padding:2rem 2rem;border-top:2px solid var(--y3);
+  text-align:center;color:var(--muted);font-size:.75rem;
+}
+footer .fl{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;color:var(--y2);margin-bottom:.4rem}
+
+/* ─── RESPONSIVE ─────────────────────────── */
+@media(max-width:900px){
+  .hero-inner{flex-direction:column;gap:2rem}
+  .hero-vis{flex:none;width:100%;max-width:360px;margin:0 auto}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .compare{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .fg.full{grid-column:auto}
+}
+@media(max-width:580px){
+  .hero-h1{font-size:1.9rem}
+  .sec{padding:3rem 1.2rem}
+  .post-wrap{padding:1.4rem 1rem}
+  .login-box{padding:1.8rem 1.2rem}
+  .txntable th,.txntable td{padding:.55rem .5rem;font-size:.72rem}
+  .hero-stat-row{gap:1.2rem}
+  .filter-bar{flex-direction:column}
+  .hero-vis{display:none}
+}
+
+/* ─── SHIMMER ANIMATION ON PRICE CARDS ───── */
+@keyframes shimmer{0%,100%{opacity:1}50%{opacity:.6}}
+.shimmer{animation:shimmer 3s ease-in-out infinite}
+
+/* ─── SCROLL PROGRESS ────────────────────── */
+#prog{position:fixed;top:var(--nav-h);left:0;height:2px;background:var(--y2);z-index:300;transition:width .1s linear}
+</style>
+</head>
+<body>
+
+<!-- particles -->
+<div id="particles"></div>
+<!-- scroll progress -->
+<div id="prog"></div>
+
+<!-- ════ NAV ════ -->
+<nav>
+  <div class="logo">Gold<span>Swap</span></div>
+  <ul class="nav-links">
+    <li><a href="#" onclick="show('home')">Home</a></li>
+    <li><a href="#" onclick="show('how')">How It Works</a></li>
+    <li><a href="#" onclick="show('browse')">Browse</a></li>
+    <li><a href="#" onclick="show('post')">Post Gold</a></li>
+    <li><a href="#" onclick="show('txn')">Transactions</a></li>
+    <li><a href="#" onclick="show('prev')">Past Users</a></li>
+    <li><a href="#" onclick="show('guide')">Guide</a></li>
+    <li><a href="#" onclick="show('backend')">Backend Spec</a></li>
+  </ul>
+  <button class="nav-cta" onclick="show('login-page')">Login</button>
+  <div class="hamburger" id="ham" onclick="toggleMob()"><span></span><span></span><span></span></div>
+</nav>
+<div class="mob-menu" id="mobmenu">
+  <a href="#" onclick="show('home');toggleMob()">Home</a>
+  <a href="#" onclick="show('how');toggleMob()">How It Works</a>
+  <a href="#" onclick="show('browse');toggleMob()">Browse Gold</a>
+  <a href="#" onclick="show('post');toggleMob()">Post Gold</a>
+  <a href="#" onclick="show('txn');toggleMob()">Transactions</a>
+  <a href="#" onclick="show('prev');toggleMob()">Past Users</a>
+  <a href="#" onclick="show('guide');toggleMob()">User Guide</a>
+  <a href="#" onclick="show('backend');toggleMob()">Backend Spec</a>
+  <a href="#" onclick="show('login-page');toggleMob()">Login / Sign Up</a>
+</div>
+
+<main>
+
+<!-- ════ TICKER ════ -->
+<div class="ticker-bar" id="ticker">
+  <span class="t-label">Today's Gold Rate</span>
+  <div class="t-item"><span class="t-val">₹7,320/g</span><span class="t-sub">24K &nbsp;<span class="t-up">▲ 0.4%</span></span></div>
+  <div class="t-item"><span class="t-val">₹6,710/g</span><span class="t-sub">22K &nbsp;<span class="t-dn">▼ 0.1%</span></span></div>
+  <div class="t-item"><span class="t-val">₹6,105/g</span><span class="t-sub">18K &nbsp;<span class="t-up">▲ 0.2%</span></span></div>
+  <div class="t-item"><span class="t-val">₹5,490/g</span><span class="t-sub">14K &nbsp;<span class="t-up">▲ 0.1%</span></span></div>
+  <span class="t-time">Reference only · Not guaranteed · Updated 10:45 AM IST</span>
+</div>
+
+<!-- ════ HOME ════ -->
+<div class="page active" id="home">
+  <div class="hero-inner">
+    <div class="hero-text reveal">
+      <span class="hero-badge">Peer-to-Peer Gold Exchange · India</span>
+      <h1 class="hero-h1">Stop losing <em>₹30,000</em> every time you sell gold.</h1>
+      <p class="hero-p">Jewellers offer ₹70,000 for gold you paid ₹1 lakh for. GoldSwap connects you directly with buyers so you can ask ₹85,000 — and both sides still save compared to a shop.</p>
+      <div class="hero-warn">
+        <span>⚠️</span>
+        <span>This is a peer-to-peer platform. Prices are set by users, not by us. GoldSwap takes a 1–5% commission per completed deal. No outcome is guaranteed.</span>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-gold" onclick="show('browse')">Browse Listings</button>
+        <button class="btn btn-outline" onclick="show('post')">Post Your Gold</button>
+        <button class="btn btn-outline" onclick="show('how')">How It Works</button>
+      </div>
+    </div>
+    <div class="hero-vis reveal">
+      <div class="price-card pc-bad shimmer">
+        <span class="pc-label">❌ Selling at a Jeweller</span>
+        <div class="pc-amount">₹70,000</div>
+        <div class="pc-note">You paid ₹1,00,000. You get ₹70,000. That's a 30% loss — the jeweller keeps the margin.</div>
+      </div>
+      <div class="pc-vs">vs GoldSwap</div>
+      <div class="price-card pc-good shimmer" style="animation-delay:.5s">
+        <span class="pc-label">✅ Selling on GoldSwap</span>
+        <div class="pc-amount">~₹85,000</div>
+        <div class="pc-note">After 2% commission: ₹83,300 to you. Buyer saved ₹7,000 vs jeweller retail. Both win.</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-stat-row">
+    <div class="h-stat"><strong>₹85K</strong><span>Typical ask price here</span></div>
+    <div class="h-stat"><strong>₹70K</strong><span>Typical jeweller offer</span></div>
+    <div class="h-stat"><strong>~₹15K</strong><span>Potential extra for seller</span></div>
+    <div class="h-stat"><strong>1–5%</strong><span>GoldSwap commission</span></div>
+    <div class="h-stat"><strong>~7 days</strong><span>Avg. time to close a deal</span></div>
+  </div>
+</div>
+
+<!-- ════ HOW IT WORKS ════ -->
+<div class="page" id="how">
+  <div class="sec">
+    <div class="wrap">
+      <p class="sec-eye reveal">The Problem & The Fix</p>
+      <h2 class="sec-title reveal">Why gold exchange works this way</h2>
+      <p class="sec-sub reveal">Plain numbers. No hype.</p>
+      <hr class="divider"/>
+      <div class="compare reveal">
+        <div class="cmp bad">
+          <span class="cmp-tag">❌ Old way — sell to jeweller</span>
+          <div class="cmp-amt">₹70,000</div>
+          <p style="font-size:.83rem;color:var(--ink2)">You paid ₹1,00,000. They weigh it, dispute the purity, and give you ₹70,000. You have no say. The jeweller resells it for ₹92,000. The difference is their profit, not yours.</p>
+          <ul><li>No price negotiation</li><li>Purity often disputed</li><li>Money the same day, but costly</li></ul>
+        </div>
+        <div class="cmp good">
+          <span class="cmp-tag">✅ GoldSwap — sell to another person</span>
+          <div class="cmp-amt">~₹85,000</div>
+          <p style="font-size:.83rem;color:var(--ink2)">A buyer who needs gold and doesn't want to pay jeweller retail prices finds your listing. They pay ₹85,000 — less than the shop, more than your old offer. GoldSwap takes 1–5% and releases the rest to you.</p>
+          <ul><li>You set the price</li><li>Buyer can verify purity</li><li>Takes days, not minutes</li></ul>
+        </div>
+      </div>
+      <p class="sec-eye reveal">Platform Flow</p>
+      <h2 class="sec-title reveal">How a deal happens — step by step</h2>
+      <p class="sec-sub reveal" style="margin-bottom:1.5rem">Four steps. Honest about the time and effort each takes.</p>
+      <div class="steps-grid reveal">
+        <div class="step-card">
+          <div class="step-n">01</div>
+          <h3>Create & Verify</h3>
+          <p>Sign up with your phone number. OTP login. Complete KYC (Aadhaar or PAN). Without KYC you can browse, but you cannot post or transact. KYC takes 1–2 business days.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-n">02</div>
+          <h3>Post Your Gold</h3>
+          <p>Add weight, karat, item type, hallmark number, photos, and your asking price. Set a private minimum you'll accept. Your listing is visible to all users immediately.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-n">03</div>
+          <h3>Negotiate & Agree</h3>
+          <p>Buyers send offers. You chat on the platform. Agree on a price. You don't have to accept the first offer. This part can take a few days depending on demand.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-n">04</div>
+          <h3>Escrow & Handover</h3>
+          <p>Buyer pays into escrow. You ship gold (insured courier) or meet in person. Buyer confirms receipt. GoldSwap deducts 1–5% commission and releases the balance to your bank account.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ BROWSE ════ -->
+<div class="page" id="browse">
+  <div class="sec">
+    <div class="wrap">
+      <p class="sec-eye reveal">Consumer Section</p>
+      <h2 class="sec-title reveal">Browse gold for exchange</h2>
+      <p class="sec-sub reveal">Listed by real users. Prices are negotiable. Always verify purity independently before paying.</p>
+      <hr class="divider"/>
+      <div class="filter-bar reveal">
+        <select><option>All Karats</option><option>24K</option><option>22K</option><option>18K</option><option>14K</option></select>
+        <select><option>All Types</option><option>Ring</option><option>Chain</option><option>Bangle</option><option>Earrings</option><option>Coin/Bar</option></select>
+        <select><option>All Cities</option><option>Hyderabad</option><option>Bengaluru</option><option>Chennai</option><option>Mumbai</option><option>Delhi</option></select>
+        <input type="number" placeholder="Max price (₹)" style="width:140px"/>
+        <button class="btn btn-gold">Filter</button>
+      </div>
+      <div class="listing-grid reveal">
+        <div class="lcard">
+          <div class="lcard-img">💍</div>
+          <div class="lcard-body">
+            <div class="lcard-title">22K Gold Ring – 8g</div>
+            <div class="lcard-meta">Ramesh K. · Hyderabad · 2 days ago</div>
+            <div class="lcard-price">₹53,800</div>
+            <div class="tags"><span class="tag">22 Karat</span><span class="tag">8g</span><span class="tag">Ring</span><span class="tag">Hallmarked</span></div>
+            <button class="btn-sm" onclick="show('login-page')">Contact Seller</button>
+          </div>
+        </div>
+        <div class="lcard">
+          <div class="lcard-img">📿</div>
+          <div class="lcard-body">
+            <div class="lcard-title">24K Gold Chain – 15g</div>
+            <div class="lcard-meta">Priya L. · Bengaluru · 1 day ago</div>
+            <div class="lcard-price">₹1,09,800</div>
+            <div class="tags"><span class="tag">24 Karat</span><span class="tag">15g</span><span class="tag">Chain</span><span class="tag">Bill Available</span></div>
+            <button class="btn-sm" onclick="show('login-page')">Contact Seller</button>
+          </div>
+        </div>
+        <div class="lcard">
+          <div class="lcard-img">💛</div>
+          <div class="lcard-body">
+            <div class="lcard-title">18K Bangle Set – 22g</div>
+            <div class="lcard-meta">Sujatha M. · Chennai · 5 hours ago</div>
+            <div class="lcard-price">₹1,34,000</div>
+            <div class="tags"><span class="tag">18 Karat</span><span class="tag">22g</span><span class="tag">Bangle</span><span class="tag">Cert.</span></div>
+            <button class="btn-sm" onclick="show('login-page')">Contact Seller</button>
+          </div>
+        </div>
+        <div class="lcard">
+          <div class="lcard-img">🪙</div>
+          <div class="lcard-body">
+            <div class="lcard-title">24K Gold Coin – 10g</div>
+            <div class="lcard-meta">Arjun S. · Mumbai · 3 days ago</div>
+            <div class="lcard-price">₹73,000</div>
+            <div class="tags"><span class="tag">24 Karat</span><span class="tag">10g</span><span class="tag">Coin</span><span class="tag">BIS Hallmark</span></div>
+            <button class="btn-sm" onclick="show('login-page')">Contact Seller</button>
+          </div>
+        </div>
+        <div class="lcard">
+          <div class="lcard-img">👂</div>
+          <div class="lcard-body">
+            <div class="lcard-title">22K Earring Pair – 6g</div>
+            <div class="lcard-meta">Divya R. · Hyderabad · Today</div>
+            <div class="lcard-price">₹40,200</div>
+            <div class="tags"><span class="tag">22 Karat</span><span class="tag">6g</span><span class="tag">Earrings</span></div>
+            <button class="btn-sm" onclick="show('login-page')">Contact Seller</button>
+          </div>
+        </div>
+        <div class="lcard">
+          <div class="lcard-img">🔱</div>
+          <div class="lcard-body">
+            <div class="lcard-title">22K Pendant – 4.5g</div>
+            <div class="lcard-meta">Kiran V. · Delhi · 6 hours ago</div>
+            <div class="lcard-price">₹30,200</div>
+            <div class="tags"><span class="tag">22 Karat</span><span class="tag">4.5g</span><span class="tag">Pendant</span><span class="tag">Bill</span></div>
+            <button class="btn-sm" onclick="show('login-page')">Contact Seller</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ POST GOLD ════ -->
+<div class="page" id="post">
+  <div class="sec">
+    <div class="wrap">
+      <p class="sec-eye reveal">Poster Section</p>
+      <h2 class="sec-title reveal">Post your gold item</h2>
+      <p class="sec-sub reveal">Fill in every field accurately. Buyers rely on this information. Wrong details can get your listing removed and your account flagged.</p>
+      <hr class="divider"/>
+      <div class="post-wrap reveal">
+        <div class="comm-banner">
+          <strong>Commission notice:</strong> GoldSwap deducts 1%–5% of the final agreed price before releasing your payment. Example: ₹85,000 deal at 2% = you receive <strong>₹83,300</strong>. Commission rate is shown before you confirm any deal.
+        </div>
+        <div class="fgrid">
+          <div class="fg">
+            <label>Item Type *</label>
+            <select id="f-type" onchange="calcPreview()">
+              <option value="">Select…</option>
+              <option>Ring</option><option>Chain / Necklace</option>
+              <option>Bangle / Kangan</option><option>Earrings</option>
+              <option>Pendant</option><option>Coin / Bar</option><option>Other</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Purity (Karat) *</label>
+            <select id="f-purity" onchange="calcPreview()">
+              <option value="">Select…</option>
+              <option>24K (99.9%)</option><option>22K (91.6%)</option>
+              <option>18K (75%)</option><option>14K (58.5%)</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Weight (grams) *</label>
+            <input type="number" id="f-wt" placeholder="e.g. 12.5" min="0.1" step="0.1" oninput="calcPreview()"/>
+            <span class="hint">Net gold weight only — no stones or metal setting</span>
+          </div>
+          <div class="fg">
+            <label>Hallmark / BIS Number</label>
+            <input type="text" id="f-hall" placeholder="e.g. BIS374XXX"/>
+            <span class="hint">Leave blank if not available</span>
+          </div>
+          <div class="fg">
+            <label>Asking Price (₹) *</label>
+            <input type="number" id="f-ask" placeholder="e.g. 85000" oninput="calcPreview()"/>
+          </div>
+          <div class="fg">
+            <label>Minimum You'll Accept (₹)</label>
+            <input type="number" id="f-min" placeholder="e.g. 80000"/>
+            <span class="hint">Private — buyers never see this</span>
+          </div>
+          <div class="fg full">
+            <label>Description</label>
+            <textarea placeholder="Describe condition, age, reason for selling. Does the original bill or purity certificate exist?"></textarea>
+          </div>
+          <div class="fg full">
+            <label>Photos (up to 5) *</label>
+            <input type="file" accept="image/*" multiple/>
+            <span class="hint">Show all sides. More photos = more buyer trust.</span>
+          </div>
+          <div class="fg">
+            <label>Your City *</label>
+            <input type="text" id="f-city" placeholder="e.g. Hyderabad"/>
+          </div>
+          <div class="fg">
+            <label>Preferred Handover *</label>
+            <select>
+              <option>In-person only</option>
+              <option>Insured courier (escrow)</option>
+              <option>Either</option>
+            </select>
+          </div>
+          <div class="calc-preview" id="calc-preview" style="display:none">
+            Commission estimate (2%): Asking <strong id="cp-ask">—</strong> → You receive approx. <strong id="cp-net">—</strong>
+          </div>
+        </div>
+        <br/>
+        <button class="btn btn-gold" style="width:100%;padding:.8rem;font-size:.95rem" onclick="show('login-page')">Post Listing</button>
+        <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:.7rem">You must be logged in and KYC-verified to post.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TRANSACTIONS ════ -->
+<div class="page" id="txn">
+  <div class="sec">
+    <div class="wrap">
+      <p class="sec-eye reveal">Transactions</p>
+      <h2 class="sec-title reveal">Your transaction history</h2>
+      <p class="sec-sub reveal">All deals — completed, pending, and cancelled. Commission shown per transaction. Dispute window is 48 hours after confirmed delivery.</p>
+      <hr class="divider"/>
+      <div class="txn-wrap reveal">
+        <table class="txntable">
+          <thead>
+            <tr>
+              <th>ID</th><th>Item</th><th>Role</th>
+              <th>Agreed</th><th>Commission</th><th>Net</th>
+              <th>Date</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><mono>GS-2041</mono></td>
+              <td>22K Ring – 8g</td><td>Seller</td>
+              <td>₹53,800</td><td>₹1,076 (2%)</td><td>₹52,724</td>
+              <td>12 Jun 2025</td><td><span class="badge b-done">Completed</span></td>
+            </tr>
+            <tr>
+              <td><mono>GS-2097</mono></td>
+              <td>24K Chain – 15g</td><td>Buyer</td>
+              <td>₹1,09,800</td><td>₹1,098 (1%)</td><td>₹1,08,702</td>
+              <td>14 Jun 2025</td><td><span class="badge b-pend">Pending</span></td>
+            </tr>
+            <tr>
+              <td><mono>GS-2031</mono></td>
+              <td>18K Bangle – 22g</td><td>Seller</td>
+              <td>₹1,34,000</td><td>₹6,700 (5%)</td><td>₹1,27,300</td>
+              <td>8 Jun 2025</td><td><span class="badge b-canc">Cancelled</span></td>
+            </tr>
+            <tr>
+              <td><mono>GS-2018</mono></td>
+              <td>24K Coin – 10g</td><td>Buyer</td>
+              <td>₹73,000</td><td>₹730 (1%)</td><td>₹72,270</td>
+              <td>2 Jun 2025</td><td><span class="badge b-disp">Disputed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PREVIOUS CONSUMERS ════ -->
+<div class="page" id="prev">
+  <div class="sec">
+    <div class="wrap">
+      <p class="sec-eye reveal">Previous Consumers</p>
+      <h2 class="sec-title reveal">What real users experienced</h2>
+      <p class="sec-sub reveal">These are illustrative examples. Results depend on market conditions, negotiation, and how long it takes to find a buyer. Not all deals close.</p>
+      <hr class="divider"/>
+      <div class="tgrid reveal">
+        <div class="tcard">
+          <p class="tcard-q">"Jeweller offered me ₹68,000 for my chain. I waited 9 days on GoldSwap and sold it for ₹86,000. After 2% commission I got ₹84,280. Worth the wait — but it is a wait."</p>
+          <div class="tcard-who">Kavitha R.</div>
+          <div class="tcard-det">Sold 22K chain · Coimbatore</div>
+          <div class="tcard-save">Saved ~₹16K vs jeweller · Took 9 days</div>
+        </div>
+        <div class="tcard">
+          <p class="tcard-q">"My budget was ₹80,000. The jeweller wanted ₹92,000 for what I needed. Found similar gold here for ₹82,000. Paid 1% commission on top. Whole thing took 5 days."</p>
+          <div class="tcard-who">Arun M.</div>
+          <div class="tcard-det">Bought 22K bangle · Hyderabad</div>
+          <div class="tcard-save">Paid ₹10K less than jeweller retail</div>
+        </div>
+        <div class="tcard">
+          <p class="tcard-q">"My listing sat for 3 weeks with no serious buyers. I eventually dropped my price by ₹4,000 and got a deal. The platform works, but it's not instant."</p>
+          <div class="tcard-who">Suma P.</div>
+          <div class="tcard-det">Sold 24K coin · Bengaluru</div>
+          <div class="tcard-save">Took 3 weeks · Had to reduce price</div>
+        </div>
+        <div class="tcard">
+          <p class="tcard-q">"Buyer disputed purity after receiving. GoldSwap froze the payment. Resolution took 8 business days. They eventually refunded me (as buyer). Process worked, but was stressful."</p>
+          <div class="tcard-who">Mohan T.</div>
+          <div class="tcard-det">Dispute case · Chennai</div>
+          <div class="tcard-save">Dispute resolved in 8 days · Refund received</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ USER GUIDE ════ -->
+<div class="page" id="guide">
+  <div class="sec">
+    <div class="wrap">
+      <p class="sec-eye reveal">User Guide</p>
+      <h2 class="sec-title reveal">How to use GoldSwap — plain steps</h2>
+      <p class="sec-sub reveal">No jargon. No hype. Just what to do and what to expect.</p>
+      <hr class="divider"/>
+      <div class="guide-list reveal">
+        <div class="gstep">
+          <div class="gstep-n">01</div>
+          <div>
+            <h4>Create your account</h4>
+            <p>Go to Login. Enter your mobile number. You receive a 6-digit OTP by SMS. Enter it and your account is created. No password is stored. Same login works on mobile app and website.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">02</div>
+          <div>
+            <h4>Complete KYC (mandatory before transacting)</h4>
+            <p>Upload Aadhaar or PAN. A licensed KYC provider verifies it. Takes 1–2 business days. Until then you can browse but not post or buy.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">03</div>
+          <div>
+            <h4>Check today's gold rate</h4>
+            <p>The ticker at the top shows today's market rate. Use it as a reference when you set your asking price. GoldSwap does not guarantee these rates — they are pulled from MCX and may lag by a few minutes.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">04</div>
+          <div>
+            <h4>To sell: Post your item</h4>
+            <p>Fill in all fields — weight, karat, type, hallmark, photos, price. Your listing goes live immediately. Edit or remove it any time before a deal is confirmed.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">05</div>
+          <div>
+            <h4>To buy: Browse and make an offer</h4>
+            <p>Filter by karat, city, price. Click "Contact Seller." Chat. Make an offer. The seller can accept, counter, or ignore it. There is no guarantee anyone responds quickly.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">06</div>
+          <div>
+            <h4>Lock the deal — escrow payment</h4>
+            <p>When both sides agree, the buyer pays into GoldSwap's escrow (via Razorpay or similar). The money does not go to the seller yet. This protects both parties.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">07</div>
+          <div>
+            <h4>Handover the gold</h4>
+            <p>Meet in person or ship via insured courier. Log the courier tracking number on the platform. GoldSwap does not arrange pickup — that is between you and the other person.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">08</div>
+          <div>
+            <h4>Buyer confirms — you get paid</h4>
+            <p>Buyer confirms receipt. GoldSwap deducts commission and releases balance to your bank account within 2–3 business days. If buyer doesn't confirm or raise a dispute within 48 hours of delivery, funds release automatically.</p>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gstep-n">09</div>
+          <div>
+            <h4>Disputes</h4>
+            <p>If there's a problem (wrong purity, damaged item), raise a dispute within 48 hours of confirmed delivery. GoldSwap staff review. They may request a third-party assay test. Resolution takes 5–10 business days. The platform decision is final.</p>
+          </div>
+        </div>
+      </div>
+      <div class="warn-box reveal">
+        <h4>⚠️ Things to know before you start</h4>
+        <p>GoldSwap is not a jeweller, bank, or commodity exchange. It is a marketplace that charges commission.</p>
+        <p>Deals can fall through. Buyers can back out before paying into escrow. Sellers can withdraw listings. This is normal and not covered by any guarantee.</p>
+        <p>GoldSwap cannot verify purity claims made by sellers. Always do your own verification — especially for high-value items. Get a hallmark test if in doubt.</p>
+        <p>Tax on gold sales may apply. Consult a tax advisor if you are selling regularly or in large amounts.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ LOGIN ════ -->
+<div class="page" id="login-page">
+  <div style="background:linear-gradient(150deg,var(--ink) 0%,#251800 100%);min-height:calc(100vh - var(--nav-h));display:flex;align-items:center;justify-content:center;padding:2rem">
+    <div class="login-box reveal">
+      <div class="login-logo">GoldSwap</div>
+      <p class="login-sub">One account · Works on web and mobile</p>
+      <div class="fg" style="margin-bottom:1rem">
+        <label style="color:rgba(255,248,198,.6)">Mobile Number *</label>
+        <input type="tel" placeholder="+91 98765 43210" style="background:rgba(255,248,198,.04);border:1px solid rgba(255,224,102,.25);color:var(--y0)"/>
+      </div>
+      <button class="btn btn-gold" style="width:100%;padding:.72rem">Send OTP</button>
+      <p class="otp-note">A 6-digit code will be sent by SMS.</p>
+      <hr style="margin:1.2rem 0;border-color:rgba(255,224,102,.1)"/>
+      <div class="fg" style="margin-bottom:1rem">
+        <label style="color:rgba(255,248,198,.6)">Enter OTP</label>
+        <input type="text" placeholder="_ _ _ _ _ _" maxlength="6" style="background:rgba(255,248,198,.04);border:1px solid rgba(255,224,102,.25);color:var(--y0);letter-spacing:.3em;text-align:center;font-size:1.2rem"/>
+      </div>
+      <button class="btn btn-gold" style="width:100%;padding:.72rem">Verify & Login</button>
+      <p class="login-terms">By continuing you accept our Terms of Service and Privacy Policy. KYC verification is required before posting or transacting. We do not sell your data.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════ BACKEND SPEC ════ -->
+<div class="page" id="backend">
+  <div class="sec">
+    <div class="wrap">
+      <p class="sec-eye reveal">Technical Specification</p>
+      <h2 class="sec-title reveal">Backend Design Plan</h2>
+      <p class="sec-sub reveal">For developers. Covers APIs, data models, auth, and transaction workflow.</p>
+      <hr class="divider"/>
+
+      <div class="honest-box reveal">
+        <h4>⚠️ Read this before you hire a developer</h4>
+        <ul>
+          <li><strong>Legal:</strong> Peer-to-peer gold trading may require an RBI licence or state-level registration depending on volume and structure. Check before launch.</li>
+          <li><strong>Escrow:</strong> Holding buyer money until delivery requires a payment gateway with escrow/route-split capability (Razorpay, Cashfree). A normal payment link does not do this.</li>
+          <li><strong>KYC:</strong> Aadhaar/PAN verification requires integration with a licensed KYC API provider (Digio, SignDesk, Hyperverge). It is not free.</li>
+          <li><strong>Dispute resolution:</strong> Software can log a dispute. A human being must actually resolve it. Budget for staff time.</li>
+          <li><strong>Timeline:</strong> A working MVP of this platform will take 4–8 months with a small team, not weeks. Do not let anyone tell you otherwise.</li>
+        </ul>
+      </div>
+
+      <!-- AUTH -->
+      <div class="spec-card reveal">
+        <h3>1. Authentication</h3>
+        <p class="sub">Phone-number OTP only. No passwords stored. JWT sessions.</p>
+        <table>
+          <thead><tr><th>Step</th><th>What the system does</th></tr></thead>
+          <tbody>
+            <tr><td>User enters phone</td><td>Server generates OTP, stores it hashed with 5-minute expiry. Sends via SMS gateway (MSG91 or AWS SNS).</td></tr>
+            <tr><td>User enters OTP</td><td>Server compares hash. If valid, issues <code>access_token</code> (15-min expiry) + <code>refresh_token</code> (30-day expiry). Both are signed JWTs.</td></tr>
+            <tr><td>API requests</td><td>Client sends <code>Authorization: Bearer &lt;token&gt;</code>. Server validates signature and expiry on every request.</td></tr>
+            <tr><td>KYC gate</td><td>All POST / transaction endpoints return <code>403 KYC_REQUIRED</code> until the user's KYC status is <code>verified</code>.</td></tr>
+            <tr><td>Cross-platform</td><td>Same token works on web and mobile app. Logout invalidates all tokens for that user.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- DATA MODELS -->
+      <div class="spec-card reveal">
+        <h3>2. Data Models</h3>
+        <p class="sub">Core database tables and their key columns.</p>
+        <table>
+          <thead><tr><th>Table</th><th>Key Fields</th></tr></thead>
+          <tbody>
+            <tr><td><strong>users</strong></td><td><code>id</code>, <code>phone</code>, <code>name</code>, <code>city</code>, <code>kyc_status</code> (pending/verified/rejected), <code>kyc_doc_type</code>, <code>kyc_doc_hash</code> (encrypted), <code>rating</code>, <code>created_at</code></td></tr>
+            <tr><td><strong>listings</strong></td><td><code>id</code>, <code>seller_id</code>, <code>item_type</code>, <code>purity_karat</code>, <code>weight_g</code>, <code>hallmark</code>, <code>asking_price</code>, <code>min_price</code> (private), <code>description</code>, <code>photos[]</code>, <code>city</code>, <code>handover</code>, <code>status</code> (active/sold/withdrawn), <code>created_at</code></td></tr>
+            <tr><td><strong>inquiries</strong></td><td><code>id</code>, <code>listing_id</code>, <code>buyer_id</code>, <code>offer_price</code>, <code>message</code>, <code>status</code> (open/accepted/rejected), <code>created_at</code></td></tr>
+            <tr><td><strong>transactions</strong></td><td><code>id</code>, <code>listing_id</code>, <code>buyer_id</code>, <code>seller_id</code>, <code>agreed_price</code>, <code>commission_pct</code>, <code>commission_amt</code>, <code>net_to_seller</code>, <code>payment_status</code> (pending/held/released/refunded), <code>delivery_status</code> (pending/shipped/delivered/disputed), <code>tracking_number</code>, <code>created_at</code>, <code>completed_at</code></td></tr>
+            <tr><td><strong>gold_rates</strong></td><td><code>id</code>, <code>date</code>, <code>karat</code>, <code>price_per_gram</code>, <code>source</code>, <code>fetched_at</code></td></tr>
+            <tr><td><strong>disputes</strong></td><td><code>id</code>, <code>transaction_id</code>, <code>raised_by</code>, <code>reason</code>, <code>evidence_urls[]</code>, <code>status</code> (open/under_review/resolved), <code>resolution</code>, <code>resolved_at</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- APIS -->
+      <div class="spec-card reveal">
+        <h3>3. API Endpoints</h3>
+        <p class="sub">REST. All endpoints require <code>Authorization: Bearer</code> header unless marked [public].</p>
+        <table>
+          <thead><tr><th>Method</th><th>Endpoint</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><span class="m mb">POST</span></td><td><code>/auth/otp/request</code></td><td>Send OTP to phone [public]</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/auth/otp/verify</code></td><td>Verify OTP → get tokens [public]</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/auth/refresh</code></td><td>Get new access token via refresh token</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/auth/logout</code></td><td>Invalidate all user tokens</td></tr>
+            <tr><td><span class="m mg">GET</span></td><td><code>/gold-rate/today</code></td><td>Today's rate by karat [public]</td></tr>
+            <tr><td><span class="m mg">GET</span></td><td><code>/listings</code></td><td>Browse listings — paginated, filterable [public]</td></tr>
+            <tr><td><span class="m mg">GET</span></td><td><code>/listings/:id</code></td><td>Single listing detail [public]</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/listings</code></td><td>Create listing [KYC required]</td></tr>
+            <tr><td><span class="m mp">PUT</span></td><td><code>/listings/:id</code></td><td>Edit listing [owner only]</td></tr>
+            <tr><td><span class="m md">DEL</span></td><td><code>/listings/:id</code></td><td>Withdraw listing [owner, no active deal]</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/listings/:id/inquire</code></td><td>Buyer sends offer [KYC required]</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/inquiries/:id/accept</code></td><td>Seller accepts → creates transaction</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/transactions/:id/pay</code></td><td>Buyer pays into escrow</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/transactions/:id/ship</code></td><td>Seller logs tracking number</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/transactions/:id/confirm</code></td><td>Buyer confirms receipt → releases funds</td></tr>
+            <tr><td><span class="m mg">GET</span></td><td><code>/transactions</code></td><td>User's own transaction history</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/transactions/:id/dispute</code></td><td>Raise dispute (within 48h of delivery)</td></tr>
+            <tr><td><span class="m mb">POST</span></td><td><code>/kyc/submit</code></td><td>Upload KYC document for verification</td></tr>
+            <tr><td><span class="m mg">GET</span></td><td><code>/users/me</code></td><td>Get own profile</td></tr>
+            <tr><td><span class="m mp">PUT</span></td><td><code>/users/me</code></td><td>Update name / city</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- COMMISSION -->
+      <div class="spec-card reveal">
+        <h3>4. Commission Logic</h3>
+        <p class="sub">Always calculated server-side. Never trust the client.</p>
+        <ul>
+          <li>Default range: <strong>1% to 5%</strong>. Rate is set by platform admin per listing category or deal size.</li>
+          <li>Commission is charged to the <strong>seller</strong> — deducted before payout.</li>
+          <li>Formula: <code>net_to_seller = agreed_price × (1 − commission_pct / 100)</code></li>
+          <li>Example: ₹85,000 at 2% → ₹83,300 to seller, ₹1,700 to GoldSwap.</li>
+          <li>Commission rate is shown to seller before they accept any deal. No surprises.</li>
+          <li>GST on the commission amount must be calculated separately under current tax rules. Get a CA to confirm.</li>
+          <li>No commission is charged on refunded or cancelled transactions.</li>
+        </ul>
+      </div>
+
+      <!-- ESCROW FLOW -->
+      <div class="spec-card reveal">
+        <h3>5. Escrow & Payment Flow</h3>
+        <p class="sub">Money does not reach the seller until the buyer confirms. This requires a real escrow setup — not a basic payment link.</p>
+        <ul>
+          <li><strong>Step 1:</strong> Buyer pays via <code>/transactions/:id/pay</code>. Money goes into payment gateway escrow (Razorpay or Cashfree route-split). It does not touch GoldSwap's main account.</li>
+          <li><strong>Step 2:</strong> Seller ships gold. Logs tracking number on platform via <code>/transactions/:id/ship</code>.</li>
+          <li><strong>Step 3:</strong> Buyer confirms receipt via <code>/transactions/:id/confirm</code>. This triggers automatic payout: commission to GoldSwap, balance to seller's bank account.</li>
+          <li><strong>Auto-release:</strong> If buyer takes no action within 48 hours of logged delivery, funds auto-release to seller.</li>
+          <li><strong>Dispute hold:</strong> Dispute raised → all funds frozen until admin resolves. Can take 5–10 business days.</li>
+          <li><strong>Refund:</strong> If dispute resolved in buyer's favour → full refund. No commission charged.</li>
+          <li><strong>Payout timeline:</strong> Funds reach seller's bank within 2–3 business days after release.</li>
+        </ul>
+      </div>
+
+      <!-- GOLD RATE FEED -->
+      <div class="spec-card reveal">
+        <h3>6. Daily Gold Rate Feed</h3>
+        <p class="sub">Displayed rates are for reference only. They are not prices GoldSwap guarantees.</p>
+        <ul>
+          <li>A scheduled background job runs daily at 10:00 AM IST, fetching rates from MCX API or a licensed data vendor.</li>
+          <li>Rates stored in <code>gold_rates</code> table by karat.</li>
+          <li><code>GET /gold-rate/today</code> returns the most recent record with its <code>fetched_at</code> timestamp.</li>
+          <li>If the feed fails, the previous day's rate is served with a visible "Rate may be outdated" warning in the UI.</li>
+          <li>GoldSwap is not a commodity exchange. The rate displayed does not bind any transaction.</li>
+        </ul>
+      </div>
+
+      <!-- STACK -->
+      <div class="spec-card reveal">
+        <h3>7. Suggested Tech Stack (One Option — Not the Only One)</h3>
+        <p class="sub">Your team may choose differently. This is a practical starting point.</p>
+        <table>
+          <thead><tr><th>Layer</th><th>Option</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td>Backend API</td><td>Node.js (Express) or Python (FastAPI)</td><td>Fast to build; large developer pool in India</td></tr>
+            <tr><td>Database</td><td>PostgreSQL</td><td>Relational integrity matters for financial transactions</td></tr>
+            <tr><td>File Storage</td><td>AWS S3 or Cloudflare R2</td><td>Listing photos. Cheap at scale.</td></tr>
+            <tr><td>OTP / SMS</td><td>MSG91 or AWS SNS</td><td>Reliable delivery in India; MSG91 has better pricing for small volumes</td></tr>
+            <tr><td>Payments / Escrow</td><td>Razorpay Route or Cashfree</td><td>Both support split payouts which replicate escrow behaviour</td></tr>
+            <tr><td>KYC</td><td>Digio, SignDesk, or Hyperverge</td><td>Aadhaar + PAN verification via certified APIs</td></tr>
+            <tr><td>Push Notifications</td><td>Firebase FCM</td><td>For mobile app alerts on offers and status changes</td></tr>
+            <tr><td>Hosting</td><td>AWS / GCP — or Railway.app to start small</td><td>Start on Railway to save money; migrate when traffic grows</td></tr>
+            <tr><td>Frontend</td><td>Next.js (React)</td><td>Good SEO, easy to deploy, large community</td></tr>
+            <tr><td>Mobile App</td><td>React Native</td><td>Share business logic with the web frontend</td></tr>
+            <tr><td>Background Jobs</td><td>BullMQ (Redis-backed)</td><td>For gold rate fetching, OTP expiry, auto-release timers</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ════ FOOTER ════ -->
+<footer>
+  <div class="fl">GoldSwap</div>
+  <p>Peer-to-peer gold exchange · 1–5% commission per transaction · KYC required</p>
+  <p style="margin-top:.4rem;font-size:.68rem;color:#5A4A1A">Displayed gold rates are market reference only and not guaranteed. This platform is not a jeweller, commodity broker, or bank. Verify all items independently. Peer-to-peer trading involves risk.</p>
+</footer>
+
+<script>
+/* ── PAGE SWITCHER ───────────────────── */
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el){el.classList.add('active');window.scrollTo(0,0);revealAll()}
+}
+
+/* ── HAMBURGER ───────────────────────── */
+function toggleMob(){
+  document.getElementById('mobmenu').classList.toggle('open');
+}
+
+/* ── SCROLL-REVEAL ───────────────────── */
+function revealAll(){
+  setTimeout(()=>{
+    document.querySelectorAll('.page.active .reveal').forEach((el,i)=>{
+      setTimeout(()=>el.classList.add('in'), i*70);
+    });
+  },60);
+}
+revealAll();
+
+/* ── SCROLL PROGRESS ─────────────────── */
+window.addEventListener('scroll',()=>{
+  const el=document.documentElement;
+  const pct=(el.scrollTop/(el.scrollHeight-el.clientHeight))*100;
+  document.getElementById('prog').style.width=pct+'%';
+});
+
+/* ── PARTICLES ───────────────────────── */
+(function(){
+  const c=document.getElementById('particles');
+  const colors=['#FFE066','#D4A017','#A67C00','#FFF8C6'];
+  for(let i=0;i<22;i++){
+    const d=document.createElement('div');
+    d.className='p';
+    const sz=6+Math.random()*14;
+    d.style.cssText=`
+      width:${sz}px;height:${sz}px;
+      left:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${12+Math.random()*20}s;
+      animation-delay:${-Math.random()*20}s;
+    `;
+    c.appendChild(d);
+  }
+})();
+
+/* ── COMMISSION CALCULATOR ───────────── */
+function calcPreview(){
+  const ask=parseFloat(document.getElementById('f-ask').value);
+  const prev=document.getElementById('calc-preview');
+  if(ask&&ask>0){
+    const net=ask*0.98;
+    document.getElementById('cp-ask').textContent='₹'+ask.toLocaleString('en-IN');
+    document.getElementById('cp-net').textContent='₹'+Math.round(net).toLocaleString('en-IN');
+    prev.style.display='block';
+  } else {
+    prev.style.display='none';
+  }
+}
+
+/* ── LIVE-ISH TICKER NUDGE ───────────── */
+(function(){
+  const vals=[
+    {sel:'.t-item:nth-child(2) .t-val',base:7320},
+    {sel:'.t-item:nth-child(3) .t-val',base:6710},
+    {sel:'.t-item:nth-child(4) .t-val',base:6105},
+    {sel:'.t-item:nth-child(5) .t-val',base:5490},
+  ];
+  setInterval(()=>{
+    vals.forEach(v=>{
+      const el=document.querySelector(v.sel);
+      if(el){
+        const nudge=(Math.random()-.5)*8;
+        const nv=Math.round((v.base+nudge)*10)/10;
+        el.textContent='₹'+nv.toLocaleString('en-IN')+'/g';
+      }
+    });
+  },4000);
+})();
+</script>
+</body>
+</html>
