@@ -24,7 +24,7 @@
         --red: #b03030;
         --redlt: #ffe8e8;
         --shadow: 0 4px 24px rgba(160, 120, 0, 0.13);
-        --radius: 20px;
+        --radius: 10px;
         --nav-h: 62px;
       }
 
@@ -179,13 +179,10 @@
         padding-top: var(--nav-h);
       }
       .page {
-        display: none;
-        min-height: calc(100vh - var(--nav-h));
+        display: block;
         position: relative;
         z-index: 1;
-      }
-      .page.active {
-        display: block;
+        scroll-margin-top: var(--nav-h);
       }
 
       /* ─── SECTION COMMON ─────────────────────── */
@@ -291,9 +288,7 @@
           #251800 55%,
           #3d2800 100%
         );
-        min-height: calc(100vh - var(--nav-h));
-        display: flex;
-        flex-direction: column;
+        min-height: 100vh;
       }
       .hero-inner {
         flex: 1;
@@ -1218,93 +1213,32 @@
     <nav>
       <div class="logo">Gold<span>Swap</span></div>
       <ul class="nav-links">
-        <li><a href="#" onclick="show('home')">Home</a></li>
-        <li><a href="#" onclick="show('how')">How It Works</a></li>
-        <li><a href="#" onclick="show('browse')">Browse</a></li>
-        <li><a href="#" onclick="show('post')">Post Gold</a></li>
-        <li><a href="#" onclick="show('txn')">Transactions</a></li>
-        <li><a href="#" onclick="show('prev')">Past Users</a></li>
-        <li><a href="#" onclick="show('guide')">Guide</a></li>
-        <li><a href="#" onclick="show('backend')">Backend Spec</a></li>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#browse">Browse</a></li>
+        <li><a href="#post">Post Gold</a></li>
+        <li><a href="#txn">Transactions</a></li>
+        <li><a href="#prev">Past Users</a></li>
+        <li><a href="#guide">Guide</a></li>
+        <li><a href="#backend">Backend Spec</a></li>
       </ul>
-      <button class="nav-cta" onclick="show('login-page')">Login</button>
+      <a href="#login-page" class="nav-cta" style="text-decoration: none"
+        >Login</a
+      >
       <div class="hamburger" id="ham" onclick="toggleMob()">
         <span></span><span></span><span></span>
       </div>
     </nav>
     <div class="mob-menu" id="mobmenu">
-      <a
-        href="#"
-        onclick="
-          show('home');
-          toggleMob();
-        "
-        >Home</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('how');
-          toggleMob();
-        "
-        >How It Works</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('browse');
-          toggleMob();
-        "
-        >Browse Gold</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('post');
-          toggleMob();
-        "
-        >Post Gold</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('txn');
-          toggleMob();
-        "
-        >Transactions</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('prev');
-          toggleMob();
-        "
-        >Past Users</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('guide');
-          toggleMob();
-        "
-        >User Guide</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('backend');
-          toggleMob();
-        "
-        >Backend Spec</a
-      >
-      <a
-        href="#"
-        onclick="
-          show('login-page');
-          toggleMob();
-        "
-        >Login / Sign Up</a
-      >
+      <a href="#home" onclick="toggleMob()">Home</a>
+      <a href="#how" onclick="toggleMob()">How It Works</a>
+      <a href="#browse" onclick="toggleMob()">Browse Gold</a>
+      <a href="#post" onclick="toggleMob()">Post Gold</a>
+      <a href="#txn" onclick="toggleMob()">Transactions</a>
+      <a href="#prev" onclick="toggleMob()">Past Users</a>
+      <a href="#guide" onclick="toggleMob()">User Guide</a>
+      <a href="#backend" onclick="toggleMob()">Backend Spec</a>
+      <a href="#login-page" onclick="toggleMob()">Login / Sign Up</a>
     </div>
 
     <main>
@@ -1333,17 +1267,18 @@
       </div>
 
       <!-- ════ HOME ════ -->
-      <div class="page active" id="home">
+      <div class="page" id="home">
         <div class="hero-inner">
           <div class="hero-text reveal">
             <span class="hero-badge">Peer-to-Peer Gold Exchange · India</span>
             <h1 class="hero-h1">
-              Stop losing <em>₹30,000</em> every time you sell gold.
+              Stop losing an average of <em>25–30%</em> every time you sell
+              gold.
             </h1>
             <p class="hero-p">
-              Jewellers offer ₹70,000 for gold you paid ₹1 lakh for. GoldSwap
-              connects you directly with buyers so you can ask ₹85,000 — and
-              both sides still save compared to a shop.
+              Jewellers typically offer 25–30% less than what you paid. GoldSwap
+              connects you directly with buyers so sellers can recover 10–15%
+              more on average — and buyers still pay less than jeweller retail.
             </p>
             <div class="hero-warn">
               <span>⚠️</span>
@@ -1354,15 +1289,9 @@
               >
             </div>
             <div class="hero-actions">
-              <button class="btn btn-gold" onclick="show('browse')">
-                Browse Listings
-              </button>
-              <button class="btn btn-outline" onclick="show('post')">
-                Post Your Gold
-              </button>
-              <button class="btn btn-outline" onclick="show('how')">
-                How It Works
-              </button>
+              <a href="#browse" class="btn btn-gold">Browse Listings</a>
+              <a href="#post" class="btn btn-outline">Post Your Gold</a>
+              <a href="#how" class="btn btn-outline">How It Works</a>
             </div>
           </div>
           <div class="hero-vis reveal">
@@ -1390,13 +1319,13 @@
         </div>
         <div class="hero-stat-row">
           <div class="h-stat">
-            <strong>₹85K</strong><span>Typical ask price here</span>
+            <strong>~85%</strong><span>Avg. recovery vs purchase price</span>
           </div>
           <div class="h-stat">
-            <strong>₹70K</strong><span>Typical jeweller offer</span>
+            <strong>~70%</strong><span>Typical jeweller offer</span>
           </div>
           <div class="h-stat">
-            <strong>~₹15K</strong><span>Potential extra for seller</span>
+            <strong>+10–15%</strong><span>Avg. extra for seller here</span>
           </div>
           <div class="h-stat">
             <strong>1–5%</strong><span>GoldSwap commission</span>
@@ -1551,9 +1480,7 @@
                     ><span class="tag">Ring</span
                     ><span class="tag">Hallmarked</span>
                   </div>
-                  <button class="btn-sm" onclick="show('login-page')">
-                    Contact Seller
-                  </button>
+                  <a href="#login-page" class="btn-sm">Contact Seller</a>
                 </div>
               </div>
               <div class="lcard">
@@ -1567,9 +1494,7 @@
                     ><span class="tag">Chain</span
                     ><span class="tag">Bill Available</span>
                   </div>
-                  <button class="btn-sm" onclick="show('login-page')">
-                    Contact Seller
-                  </button>
+                  <a href="#login-page" class="btn-sm">Contact Seller</a>
                 </div>
               </div>
               <div class="lcard">
@@ -1585,9 +1510,7 @@
                     ><span class="tag">Bangle</span
                     ><span class="tag">Cert.</span>
                   </div>
-                  <button class="btn-sm" onclick="show('login-page')">
-                    Contact Seller
-                  </button>
+                  <a href="#login-page" class="btn-sm">Contact Seller</a>
                 </div>
               </div>
               <div class="lcard">
@@ -1601,9 +1524,7 @@
                     ><span class="tag">Coin</span
                     ><span class="tag">BIS Hallmark</span>
                   </div>
-                  <button class="btn-sm" onclick="show('login-page')">
-                    Contact Seller
-                  </button>
+                  <a href="#login-page" class="btn-sm">Contact Seller</a>
                 </div>
               </div>
               <div class="lcard">
@@ -1616,9 +1537,7 @@
                     <span class="tag">22 Karat</span><span class="tag">6g</span
                     ><span class="tag">Earrings</span>
                   </div>
-                  <button class="btn-sm" onclick="show('login-page')">
-                    Contact Seller
-                  </button>
+                  <a href="#login-page" class="btn-sm">Contact Seller</a>
                 </div>
               </div>
               <div class="lcard">
@@ -1633,9 +1552,7 @@
                     ><span class="tag">Pendant</span
                     ><span class="tag">Bill</span>
                   </div>
-                  <button class="btn-sm" onclick="show('login-page')">
-                    Contact Seller
-                  </button>
+                  <a href="#login-page" class="btn-sm">Contact Seller</a>
                 </div>
               </div>
             </div>
@@ -1758,7 +1675,7 @@
               <button
                 class="btn btn-gold"
                 style="width: 100%; padding: 0.8rem; font-size: 0.95rem"
-                onclick="show('login-page')"
+                href="#login-page"
               >
                 Post Listing
               </button>
@@ -2061,11 +1978,10 @@
         <div
           style="
             background: linear-gradient(150deg, var(--ink) 0%, #251800 100%);
-            min-height: calc(100vh - var(--nav-h));
+            padding: 5rem 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
           "
         >
           <div class="login-box reveal">
@@ -2643,33 +2559,23 @@
     </footer>
 
     <script>
-      /* ── PAGE SWITCHER ───────────────────── */
-      function show(id) {
-        document
-          .querySelectorAll(".page")
-          .forEach((p) => p.classList.remove("active"));
-        const el = document.getElementById(id);
-        if (el) {
-          el.classList.add("active");
-          window.scrollTo(0, 0);
-          revealAll();
-        }
-      }
-
       /* ── HAMBURGER ───────────────────────── */
       function toggleMob() {
         document.getElementById("mobmenu").classList.toggle("open");
       }
 
-      /* ── SCROLL-REVEAL ───────────────────── */
-      function revealAll() {
-        setTimeout(() => {
-          document.querySelectorAll(".page.active .reveal").forEach((el, i) => {
-            setTimeout(() => el.classList.add("in"), i * 70);
-          });
-        }, 60);
-      }
-      revealAll();
+      /* ── SCROLL-REVEAL (IntersectionObserver) ── */
+      (function () {
+        const obs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) e.target.classList.add("in");
+            });
+          },
+          { threshold: 0.12 },
+        );
+        document.querySelectorAll(".reveal").forEach((el) => obs.observe(el));
+      })();
 
       /* ── SCROLL PROGRESS ─────────────────── */
       window.addEventListener("scroll", () => {
